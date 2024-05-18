@@ -9,5 +9,4 @@ fs.writeFile(filePath, text, (err) => {
     console.error(err);
     return;
   }
-  console.log('The file has been written successfully!');
 });
