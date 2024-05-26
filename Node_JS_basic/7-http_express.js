@@ -23,4 +23,8 @@ app.get('/students', async (req, res) => {
   }
 });
 
+app.listen(port, () => {
+  console.log(`Example app listening at http://localhost:${port}`);
+});
+
 module.exports = app;
