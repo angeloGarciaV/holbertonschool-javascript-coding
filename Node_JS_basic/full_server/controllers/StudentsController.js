@@ -1,28 +1,43 @@
-const readDatabase = require('../utils');
+import readDatabase from '../utils';
 
 class StudentsController {
-  static getAllStudents(request, response) {
-    readDatabase(process.argv[2])
-      .then((result) => {
-        let firstLine = 'This is the list of our students';
-        Object.entries(result).forEach(([key, value]) => {
-          firstLine += `\nNumber of students in ${key}: ${value.length}. List: ${value.join(', ')}`;
-        });
-        response.status(200).send(firstLine);
+  static getAllStudents(request, response, DATABASE) {
+    readDatabase(DATABASE)
+      .then((fields) => {
+        const students = [];
+        let msg;
+
+        students.push('This is the list of our students');
+
+        for (const key of Object.keys(fields)) {
+          msg = `Number of students in ${key}: ${
+            fields[key].length
+          }. List: ${fields[key].join(', ')}`;
+
+          students.push(msg);
+        }
+        response.send(200, `${students.join('\n')}`);
       })
-      .catch((error) => { response.status(500).send(error.message); });
+      .catch(() => {
+        response.send(500, 'Cannot load the database');
+      });
   }
 
-  static getAllStudentsByMajor(request, response) {
-    readDatabase(process.argv[2])
-      .then((result) => {
-        const { major } = request.params;
-        if (Object.prototype.hasOwnProperty.call(result, major)) {
-          response.status(200).send(`List: ${result[major].join(', ')}`);
-        } else { response.status(500).send('Major parameter must be CS or SWE'); }
-      })
-      .catch((error) => { response.status(500).send(error.message); });
+  static getAllStudentsByMajor(request, response, DATABASE) {
+    const { major } = request.params;
+
+    if (major !== 'CS' && major !== 'SWE') {
+      response.send(500, 'Major parameter must be CS or SWE');
+    } else {
+      readDatabase(DATABASE)
+        .then((fields) => {
+          const students = fields[major];
+
+          response.send(200, `List: ${students.join(', ')}`);
+        })
+        .catch(() => response.send(500, 'Cannot load the database'));
+    }
   }
 }
 
-module.exports = StudentsController;
+export default StudentsController;
